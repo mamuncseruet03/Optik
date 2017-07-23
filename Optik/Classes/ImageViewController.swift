@@ -17,7 +17,10 @@ internal final class ImageViewController: UIViewController {
         static let ZoomAnimationDuration: TimeInterval = 0.3
     }
     
+    var isAlreadyAddedToTabbar = false
     // MARK: - Properties
+    var photoURL:PhotoURL?
+    
     
     var image: UIImage? {
         didSet {
@@ -30,6 +33,9 @@ internal final class ImageViewController: UIViewController {
         }
     }
     private(set) var imageView: UIImageView?
+    private var isControlHidden = false
+    private var btnSave: UIButton?
+    private var btnFavorite: UIButton?
 
     let index: Int
     
@@ -61,8 +67,9 @@ internal final class ImageViewController: UIViewController {
     
     // MARK: - Init/Deinit
     
-    init(image: UIImage? = nil, activityIndicatorColor: UIColor? = nil, index: Int) {
+    init(photoURL:PhotoURL, image: UIImage? = nil, activityIndicatorColor: UIColor? = nil, index: Int) {
         self.image = image
+        self.photoURL = photoURL
         self.activityIndicatorColor = activityIndicatorColor
         self.index = index
         
@@ -79,12 +86,29 @@ internal final class ImageViewController: UIViewController {
         super.viewDidLoad()
         
         setupDesign()
+        
+      
     }
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         
         resizeScrollViewFrame(to: view.bounds.size)
+        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if isAlreadyAddedToTabbar {
+            //MainViewController.shared.circleMenuController?.showImageViewControls()
+        }
+        if !isAlreadyAddedToTabbar {
+            isAlreadyAddedToTabbar = true
+        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -125,6 +149,8 @@ internal final class ImageViewController: UIViewController {
         self.scrollView = scrollView
         self.imageView = imageView
         
+        
+        
         if let image = image {
             imageView.image = image
             resetImageView()
@@ -158,7 +184,18 @@ internal final class ImageViewController: UIViewController {
             self.activityIndicatorView = activityIndicatorView
         }
         
+        btnSave = UIButton()
+        view.addSubview(btnSave!)
+        btnSave?.backgroundColor = UIColor.red
+        
         setupTapGestureRecognizer()
+        
+        self.imageView?.vl.setImage(urls: [
+            .url(URL(string: (self.photoURL?.thumbURL)!)!, priority: 100),
+            .url(URL(string: (self.photoURL?.fullImageURL)!)!, priority: 1000)
+            ],complition: { [weak self] in
+           self?.activityIndicatorView?.stopAnimating()
+        })
     }
     
     private func setupTapGestureRecognizer() {
@@ -167,8 +204,26 @@ internal final class ImageViewController: UIViewController {
         tapGestureRecognizer.numberOfTapsRequired = 2 // Only allow double tap.
         
         view.addGestureRecognizer(tapGestureRecognizer)
+        
+        let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImageViewController.didSingleTap(_:)))
+        singleTapGestureRecognizer.numberOfTouchesRequired = 1
+        view.addGestureRecognizer(singleTapGestureRecognizer)
     }
     
+    @objc private func didSingleTap(_ sender: UITapGestureRecognizer) {
+        toggleControls()
+    }
+    
+    private func toggleControls() {
+        isControlHidden = !isControlHidden
+        MainViewController.shared.circleMenuController?.handleTapbarDisplay(hidden:isControlHidden)
+        
+        if isControlHidden {
+            
+        } else {
+            
+        }
+    }
     private func calculateEffectiveImageSize() {
         guard
             let image = image,
@@ -305,3 +360,5 @@ extension ImageViewController: UIScrollViewDelegate {
     }
     
 }
+
+

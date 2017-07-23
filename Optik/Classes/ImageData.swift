@@ -17,6 +17,6 @@ import UIKit
 internal enum ImageData {
     
     case local(images: [UIImage])
-    case remote(urls: [URL], imageDownloader: ImageDownloader)
+    case remote(urls: [PhotoURL], imageDownloader: ImageDownloader?)
     
 }

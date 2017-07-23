@@ -5,7 +5,7 @@
 //  Created by Htin Linn on 5/9/16.
 //  Copyright © 2016 Prolific Interactive. All rights reserved.
 //
-
+// test
 import UIKit
 
 /// View controller for displaying a collection of photos.
@@ -47,6 +47,7 @@ internal final class AlbumViewController: UIViewController {
         }
     }
     
+     var isAlreadyAddedToTabbar = false
     // MARK: Override properties
     
     override var prefersStatusBarHidden : Bool {
@@ -59,7 +60,7 @@ internal final class AlbumViewController: UIViewController {
     
     // MARK: Private properties
     
-    private var pageViewController: UIPageViewController
+    public var pageViewController: UIPageViewController
     fileprivate var currentImageViewController: ImageViewController? {
         guard let viewControllers = pageViewController.viewControllers, viewControllers.count == 1 else {
             return nil
@@ -125,6 +126,16 @@ internal final class AlbumViewController: UIViewController {
                 self.setNeedsStatusBarAppearanceUpdate()
             }) 
         }
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if isAlreadyAddedToTabbar {
+            MainViewController.shared.circleMenuController?.showImageViewControls()
+        }
+        if !isAlreadyAddedToTabbar {
+            isAlreadyAddedToTabbar = true
+        }
+        
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -228,28 +239,30 @@ internal final class AlbumViewController: UIViewController {
                 return nil
             }
             
-            return ImageViewController(image: images[index], index: index)
+            //return ImageViewController(image: images[index], index: index)
         case .remote(let urls, let imageDownloader):
             guard index >= 0 && index < urls.count else {
                 return nil
             }
             
-            let imageViewController = ImageViewController(activityIndicatorColor: activityIndicatorColor, index: index)
-            let url = urls[index]
             
-            if let image = cachedRemoteImages[url] {
-                imageViewController.image = image
-            } else {
-                imageDownloader.downloadImage(from: url, completion: {
-                    [weak self] (image) in
-                    
-                    self?.cachedRemoteImages[url] = image
-                    imageViewController.image = image
-                    })
-            }
+            let url = urls[index]
+            let imageViewController = ImageViewController(photoURL:url, activityIndicatorColor: activityIndicatorColor, index: index)
+            
+//            if let image = cachedRemoteImages[url] {
+//                imageViewController.image = image
+//            } else {
+//                imageDownloader.downloadImage(from: url, completion: {
+//                    [weak self] (image) in
+//
+//                    self?.cachedRemoteImages[url] = image
+//                    imageViewController.image = image
+//                    })
+//            }
             
             return imageViewController
         }
+       return nil
     }
     
     @objc private func didTapDismissButton(_ sender: UIButton) {

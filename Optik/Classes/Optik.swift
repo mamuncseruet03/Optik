@@ -48,9 +48,9 @@ public func imageViewer(withImages images: [UIImage],
  
  - returns: The created view controller.
  */
-public func imageViewer(withURLs urls: [URL],
+public func imageViewer(withURLs urls: [PhotoURL],
                                  initialImageDisplayIndex: Int = 0,
-                                 imageDownloader: ImageDownloader,
+                                 imageDownloader: ImageDownloader? = nil,
                                  activityIndicatorColor: UIColor = .white,
                                  dismissButtonImage: UIImage? = nil,
                                  dismissButtonPosition: DismissButtonPosition = .topLeading) -> UIViewController {
